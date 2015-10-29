@@ -70,9 +70,38 @@ graph relies on will be ignored when determining if a build of the sink project 
 
 You will need a Java Development Kit (>= 1.5) and [Maven](http://maven.apache.org/).
 
-In your Maven configuration (settings.xml) file, under the **pluginGroups** tag, add:
+In your Maven configuration (settings.xml) file, under the **mirrors** tag, add:
 
-    <pluginGroup>org.eclipse.hudson.tools</pluginGroup>
+    <mirror>
+      <id>repo.jenkins-ci.org</id>
+      <url>http://repo.jenkins-ci.org/public/</url>
+      <mirrorOf>m.g.o-public</mirrorOf>
+    </mirror>
+
+    under the **pluginGroups** tag add:
+
+    <pluginGroup>org.jenkins-ci.tools</pluginGroup>
+
+    under the **profiles** tag add:
+
+    <profile>
+      <id>jenkins</id>
+      <activation>
+        <activeByDefault>true</activeByDefault> <!-- change this to false, if you don't like to have it on per default -->
+      </activation>
+      <repositories>
+        <repository>
+          <id>repo.jenkins-ci.org</id>
+          <url>http://repo.jenkins-ci.org/public/</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>repo.jenkins-ci.org</id>
+          <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
     
 To build:
 
@@ -89,8 +118,7 @@ Then you can access the embedded Hudson instance at [http://localhost:8080/](htt
 
 ## Notes
 
-This has been developed against Hudson version 3.0.1-b2 only. Running this plugin under Jenkins is not supported (although adding support in a Jenkins
-environment should not be too difficult).
+This has been developed against Jenkins 1.635 only. It should support Jenkins 1.580.1 and greater.
 
 ## License
 
