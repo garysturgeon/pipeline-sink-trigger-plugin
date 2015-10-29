@@ -1,12 +1,12 @@
 package hudson.plugins.pipelinesinktrigger;
 
+import jenkins.model.Jenkins;
 import hudson.Extension;
 import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.TopLevelItem;
 import hudson.model.AbstractProject;
 import hudson.model.Cause;
-import hudson.model.Hudson;
 import hudson.model.Project;
 import hudson.model.Run;
 import hudson.model.listeners.ItemListener;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import org.antlr.runtime.RecognitionException;
+import antlr.ANTLRException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jgrapht.DirectedGraph;
@@ -76,8 +76,8 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
 
     @DataBoundConstructor
     public BuildGraphPipelineSinkTrigger(String spec, String rootProjectName, String sinkProjectName, String excludedProjectNames,
-            boolean ignoreNonSuccessfulUpstreamDependencyBuilds, boolean verbose) throws RecognitionException {
-        super(spec);
+            boolean ignoreNonSuccessfulUpstreamDependencyBuilds, boolean verbose) throws ANTLRException {
+		super(spec);
         this.rootProjectName = rootProjectName;
         this.sinkProjectName = sinkProjectName;
         this.excludedProjectNames = excludedProjectNames;
@@ -107,11 +107,11 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
 
     @Override
     public void run() {
-        if (!Hudson.getInstance().isQuietingDown()) {
+        if (!Jenkins.getInstance().isQuietingDown()) {
             LOGGER.log(Level.INFO, MARKER);
             LOGGER.log(Level.INFO, Messages.BuildGraphPipelineSinkTrigger_DecidingIfBuildShouldBeTriggered(this.job.getName(), sinkProjectName));
             try {
-                final TopLevelItem rootProjectItem = Hudson.getInstance().getItem(rootProjectName);
+                final TopLevelItem rootProjectItem = Jenkins.getInstance().getItem(rootProjectName);
                 if (rootProjectItem == null) {
                     LOGGER.log(Level.INFO, Messages.BuildGraphPipelineSinkTrigger_RootProjectDoesNotExist(rootProjectName));
                     return;
@@ -122,7 +122,7 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
                     return;
                 }
 
-                final TopLevelItem sinkProjectItem = Hudson.getInstance().getItem(sinkProjectName);
+                final TopLevelItem sinkProjectItem = Jenkins.getInstance().getItem(sinkProjectName);
                 if (sinkProjectItem == null) {
                     LOGGER.log(Level.INFO, Messages.BuildGraphPipelineSinkTrigger_SinkProjectDoesNotExist(sinkProjectName));
                     return;
@@ -135,7 +135,7 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
 
                 final Set<String> exclusions = new HashSet<String>();
                 for (String excludedPojectName : StringUtils.split(excludedProjectNames, ',')) {
-                    final TopLevelItem excludedProjectItem = Hudson.getInstance().getItem(excludedPojectName.trim());
+                    final TopLevelItem excludedProjectItem = Jenkins.getInstance().getItem(excludedPojectName.trim());
                     if (excludedProjectItem == null) {
                         LOGGER.log(Level.INFO, Messages.BuildGraphPipelineSinkTrigger_ExcludedProjectDoesNotExist(excludedPojectName.trim()));
                         return;
@@ -289,34 +289,45 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
         private final TimerTrigger.DescriptorImpl timerTriggerDescriptorDelegate = new TimerTrigger.DescriptorImpl();
 
         public FormValidation doCheckRootProjectName(@QueryParameter String rootProjectName) throws IOException, ServletException {
-            return validateProjectParemeter(rootProjectName);
+            return validateProjectParameter(rootProjectName);
         }
 
         public FormValidation doCheckSinkProjectName(@QueryParameter String sinkProjectName) throws IOException, ServletException {
-            return validateProjectParemeter(sinkProjectName);
+            return validateProjectParameter(sinkProjectName);
         }
 
         public FormValidation doCheckExcludedProjectNames(@QueryParameter String excludedProjectNames) throws IOException, ServletException {
             if (excludedProjectNames.trim().length() > 0) {
-                for (String excludedPojectName : StringUtils.split(excludedProjectNames, ',')) {
-                    final FormValidation val = validateProjectParemeter(excludedPojectName.trim());
-                    if (FormValidation.Kind.ERROR.equals(val.getKind())) {
-                        return val;
-                    }
+                for (String excludedProjectName : StringUtils.split(excludedProjectNames, ',')) {
+                    //final FormValidation val = validateProjectParameter(excludedProjectName.trim());
+                    //if (FormValidation.Kind.ERROR.equals(val.getKind())) {
+                    //    return val;
+                    //}
+					if (excludedProjectName.trim().length() == 0) {
+						return FormValidation.error(Messages.BuildGraphPipelineSinkTrigger_NoProjectSpecified());
+					}
+					final Item item = Jenkins.getInstance().getItem(excludedProjectName.trim());
+					if (item == null) {
+						return FormValidation.error(Messages.BuildGraphPipelineSinkTrigger_NoSuchProject(excludedProjectName.trim()));
+					}
+					if (!AbstractProject.class.isAssignableFrom(item.getClass())) {
+						return FormValidation.error(hudson.tasks.Messages.BuildTrigger_NotBuildable(excludedProjectName.trim()));
+					}
                 }
             }
             return FormValidation.ok();
         }
 
         public FormValidation doCheckSpec(@QueryParameter String spec) throws IOException, ServletException {
-            return timerTriggerDescriptorDelegate.doCheckSpec(spec);
+            //return timerTriggerDescriptorDelegate.doCheckSpec(spec);
+			return FormValidation.ok();
         }
 
-        private FormValidation validateProjectParemeter(String projectName) throws IOException, ServletException {
+        private FormValidation validateProjectParameter(String projectName) throws IOException, ServletException {
             if (projectName.trim().length() == 0) {
                 return FormValidation.error(Messages.BuildGraphPipelineSinkTrigger_NoProjectSpecified());
             }
-            final Item item = Hudson.getInstance().getItem(projectName);
+            final Item item = Jenkins.getInstance().getItem(projectName);
             if (item == null) {
                 return FormValidation.error(Messages.BuildGraphPipelineSinkTrigger_NoSuchProject(projectName));
             }
@@ -441,7 +452,7 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
 
         @Override
         public void onDeleted(Item item) {
-            for (Project<?, ?> p : Hudson.getInstance().getProjects()) {
+            for (Project<?, ?> p : Jenkins.getInstance().getProjects()) {
                 final BuildGraphPipelineSinkTrigger trigger = p.getTrigger(BuildGraphPipelineSinkTrigger.class);
                 if (trigger != null) {
                     if (trigger.onJobDeleted(item.getName())) {
@@ -457,7 +468,7 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
 
         @Override
         public void onRenamed(Item item, String oldName, String newName) {
-            for (Project<?, ?> p : Hudson.getInstance().getProjects()) {
+            for (Project<?, ?> p : Jenkins.getInstance().getProjects()) {
                 final BuildGraphPipelineSinkTrigger trigger = p.getTrigger(BuildGraphPipelineSinkTrigger.class);
                 if (trigger != null) {
                     if (trigger.onJobRenamed(oldName, newName)) {

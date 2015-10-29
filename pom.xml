@@ -1,11 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-        <groupId>org.eclipse.hudson.plugins</groupId>
-        <artifactId>hudson-plugin-parent</artifactId>
-        <version>3.0.1-b2</version>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<!-- Baseline Jenkins version you use to build and test the plugin. Users must have this version or newer to run. -->
+		<version>1.580.1</version>
+		<relativePath/>
     </parent>
-    <groupId>com.compuware.hudson.plugins</groupId>
+    <groupId>com.compuware.jenkins.plugins</groupId>
 	<artifactId>pipeline-sink-trigger-plugin</artifactId>
 	<version>0.5.0-SNAPSHOT</version>
 	<name>Hudson :: Pipeline Sink Trigger Plugin</name>
@@ -17,19 +19,38 @@
             <email>johnnymongiat@gmail.com</email>
             <timezone>-5</timezone>
         </developer>
+        <developer>
+            <name>Gary Sturgeon</name>
+            <email>gsturge@earthlink.net</email>
+            <timezone>-5</timezone>
+        </developer>
     </developers>
     
-    <scm>
+    <!-- 
+	<scm>
         <connection>scm:git:https://github.com/johnnymongiat/pipeline-sink-trigger-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/johnnymongiat/pipeline-sink-trigger-plugin.git</developerConnection>
         <url>https://github.com/johnnymongiat/pipeline-sink-trigger-plugin.git</url>
     </scm>
-    
-    <issueManagement>
+
+	<issueManagement>
         <system>github</system>
         <url>https://github.com/johnnymongiat/pipeline-sink-trigger-plugin/issues</url>
     </issueManagement>
-    
+    -->
+	<repositories>
+		<repository>
+		  <id>repo.jenkins-ci.org</id>
+		  <url>http://repo.jenkins-ci.org/public/</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+		  <id>repo.jenkins-ci.org</id>
+		  <url>http://repo.jenkins-ci.org/public/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
@@ -73,6 +94,11 @@
 			<groupId>org.jgrapht</groupId>
 			<artifactId>jgrapht-jdk1.5</artifactId>
 			<version>0.7.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.0</version>
 		</dependency>
 	</dependencies>
 </project>

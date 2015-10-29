@@ -4,7 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.antlr.runtime.RecognitionException;
+import antlr.ANTLRException;
+//import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
 
 public class TestBuildGraphPipelineSinkTrigger {
@@ -13,12 +14,12 @@ public class TestBuildGraphPipelineSinkTrigger {
     private static final String DEFAULT_ROOT_PROJECT_NAME = "Mock-Root";
     private static final String DEFAULT_SINK_PROJECT_NAME = "Mock-Sink";
 
-    private BuildGraphPipelineSinkTrigger newBuildGraphPipelineSinkTrigger(String excludedProjectNames) throws RecognitionException {
+    private BuildGraphPipelineSinkTrigger newBuildGraphPipelineSinkTrigger(String excludedProjectNames) throws ANTLRException {
         return new BuildGraphPipelineSinkTrigger(DEFAULT_SPEC, DEFAULT_ROOT_PROJECT_NAME, DEFAULT_SINK_PROJECT_NAME, excludedProjectNames, false, false);
     }
 
     @Test
-    public void onJobRenamedShouldCauseNoChangeWhenRenamedJobIsNotRootProjectNameOrSinkProjectOrPartOfTheExcludedProjectNames() throws RecognitionException {
+    public void onJobRenamedShouldCauseNoChangeWhenRenamedJobIsNotRootProjectNameOrSinkProjectOrPartOfTheExcludedProjectNames() throws ANTLRException {
         final BuildGraphPipelineSinkTrigger trigger = newBuildGraphPipelineSinkTrigger("");
         final boolean changed = trigger.onJobRenamed("Job-1", "Job-1-1");
         assertFalse(changed);
@@ -28,7 +29,7 @@ public class TestBuildGraphPipelineSinkTrigger {
     }
 
     @Test
-    public void onJobRenamedShouldCauseChangeWhenRenamedJobIsTheRootProjectName() throws RecognitionException {
+    public void onJobRenamedShouldCauseChangeWhenRenamedJobIsTheRootProjectName() throws ANTLRException {
         final BuildGraphPipelineSinkTrigger trigger = newBuildGraphPipelineSinkTrigger("");
         final String newRootProjectName = DEFAULT_ROOT_PROJECT_NAME.concat("-1");
         final boolean changed = trigger.onJobRenamed(DEFAULT_ROOT_PROJECT_NAME, newRootProjectName);
@@ -39,7 +40,7 @@ public class TestBuildGraphPipelineSinkTrigger {
     }
 
     @Test
-    public void onJobRenamedShouldCauseChangeWhenRenamedJobIsTheSinkProjectName() throws RecognitionException {
+    public void onJobRenamedShouldCauseChangeWhenRenamedJobIsTheSinkProjectName() throws ANTLRException {
         final BuildGraphPipelineSinkTrigger trigger = newBuildGraphPipelineSinkTrigger("");
         final String newSinkProjectName = DEFAULT_SINK_PROJECT_NAME.concat("-1");
         final boolean changed = trigger.onJobRenamed(DEFAULT_SINK_PROJECT_NAME, newSinkProjectName);
@@ -50,7 +51,7 @@ public class TestBuildGraphPipelineSinkTrigger {
     }
 
     @Test
-    public void onJobRenamedShouldCauseChangeWhenRenamedJobIsPartOfTheExcludedProjectNames() throws RecognitionException {
+    public void onJobRenamedShouldCauseChangeWhenRenamedJobIsPartOfTheExcludedProjectNames() throws ANTLRException {
         final String excludedProjectNames = "Job-1, Job-2, Job-3";
         final BuildGraphPipelineSinkTrigger trigger = newBuildGraphPipelineSinkTrigger(excludedProjectNames);
         final boolean changed = trigger.onJobRenamed("Job-2", "Job-2-2");
@@ -61,7 +62,7 @@ public class TestBuildGraphPipelineSinkTrigger {
     }
 
     @Test
-    public void onJobDeletedShouldCauseNoChangesWhenTriggerHasNoEmptyExcludedProjectNames() throws RecognitionException {
+    public void onJobDeletedShouldCauseNoChangesWhenTriggerHasNoEmptyExcludedProjectNames() throws ANTLRException {
         final BuildGraphPipelineSinkTrigger trigger = newBuildGraphPipelineSinkTrigger("");
         final boolean changed = trigger.onJobDeleted("Job-1");
         assertFalse(changed);
@@ -69,7 +70,7 @@ public class TestBuildGraphPipelineSinkTrigger {
     }
 
     @Test
-    public void onJobDeletedShouldCauseChangeWhenDeletedJobMatchesAnExcludedProjectName() throws RecognitionException {
+    public void onJobDeletedShouldCauseChangeWhenDeletedJobMatchesAnExcludedProjectName() throws ANTLRException {
         final String excludedProjectNames = "Job-1, Job-2, Job-3";
         final BuildGraphPipelineSinkTrigger trigger = newBuildGraphPipelineSinkTrigger(excludedProjectNames);
         boolean changed = trigger.onJobDeleted("Job-1");
@@ -84,7 +85,7 @@ public class TestBuildGraphPipelineSinkTrigger {
     }
 
     @Test
-    public void onJobDeletedShouldCauseNoChangeWhenDeletedJobIsNotPartOfTheExcludedProjectNames() throws RecognitionException {
+    public void onJobDeletedShouldCauseNoChangeWhenDeletedJobIsNotPartOfTheExcludedProjectNames() throws ANTLRException {
         final String excludedProjectNames = "Job-1, Job-2, Job-3";
         final BuildGraphPipelineSinkTrigger trigger = newBuildGraphPipelineSinkTrigger(excludedProjectNames);
         boolean changed = trigger.onJobDeleted("Job-4");
