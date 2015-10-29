@@ -78,11 +78,11 @@ In your Maven configuration (settings.xml) file, under the **mirrors** tag, add:
       <mirrorOf>m.g.o-public</mirrorOf>
     </mirror>
 
-    under the **pluginGroups** tag add:
+under the **pluginGroups** tag add:
 
     <pluginGroup>org.jenkins-ci.tools</pluginGroup>
 
-    under the **profiles** tag add:
+under the **profiles** tag add:
 
     <profile>
       <id>jenkins</id>
