@@ -40,6 +40,7 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.AncestorInPath;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
@@ -318,9 +319,8 @@ public class BuildGraphPipelineSinkTrigger extends Trigger<AbstractProject<?,?>>
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckSpec(@QueryParameter String spec) throws IOException, ServletException {
-            //return timerTriggerDescriptorDelegate.doCheckSpec(spec);
-			return FormValidation.ok();
+        public FormValidation doCheckSpec(@QueryParameter String spec, @AncestorInPath Item item) throws IOException, ServletException {
+            return timerTriggerDescriptorDelegate.doCheckSpec(spec, item);
         }
 
         private FormValidation validateProjectParameter(String projectName) throws IOException, ServletException {
